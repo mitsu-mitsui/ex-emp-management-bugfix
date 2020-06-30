@@ -31,7 +31,11 @@
 
 <!-- ここにモックのform要素を貼り付けます -->
 
+					 	
 					<form method="post" action="login.html" th:action="@{/insert}" th:object="${insertAdministratorForm}">
+					<!-- disabled 確認用
+					<form method="post"  th:object="${insertAdministratorForm}">
+					 -->	 
 						<fieldset>
 							<legend>管理者登録<br>(システムにログインできる管理者を登録します)</legend>
 							<!-- 氏名 -->
@@ -100,6 +104,18 @@
 	<!-- end container -->
 	<script
 		src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script src="../../static/js/bootstrap.min.js"></script>
+	<!--  <script src="../../static/js/bootstrap.min.js"></script>
+	-->
+	<script >
+	$(function(){//btn
+		$(".btn btn-primary").on("click",function(){
+			$(".btn btn-primary").prop("disabled",true);
+		});
+		
+	});
+	</script>
+	
+	
+
 </body>
 </html>
