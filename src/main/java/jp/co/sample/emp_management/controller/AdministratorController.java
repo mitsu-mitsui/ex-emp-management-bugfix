@@ -57,6 +57,7 @@ public class AdministratorController {
 	 */
 	@RequestMapping("/toInsert")
 	public String toInsert() {
+		
 		return "administrator/insert";
 	}
 
@@ -70,10 +71,11 @@ public class AdministratorController {
 	@RequestMapping("/insert")
 	public String insert(InsertAdministratorForm form) {
 		Administrator administrator = new Administrator();
-		// フォームからドメインにプロパティ値をコピー
+		// フォームからドメインにプロパティ値をコピー	
 		BeanUtils.copyProperties(form, administrator);
 		administratorService.insert(administrator);
-		return "employee/list";
+		
+		return "redirect:/";
 	}
 
 	/////////////////////////////////////////////////////
