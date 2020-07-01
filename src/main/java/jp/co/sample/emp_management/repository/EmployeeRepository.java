@@ -1,5 +1,6 @@
 package jp.co.sample.emp_management.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,5 +84,27 @@ public class EmployeeRepository {
 
 		String updateSql = "UPDATE employees SET dependents_count=:dependentsCount WHERE id=:id";
 		template.update(updateSql, param);
+	}
+
+	/**
+	 * 従業員名のあいまい検索をする．
+	 * 
+	 * @param name 検索する従業員名
+	 * @return 一致する従業員情報一覧
+	 */
+	public List<Employee> findLikeName(String name) {
+		List<Employee> list = new ArrayList<>();
+
+		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
+				+ " WHERE name LIKE :name"
+				+ " ORDER BY hire_date ASC";
+		SqlParameterSource param = new MapSqlParameterSource("name","%"+name+"%");
+		
+		list = template.query(sql, param,EMPLOYEE_ROW_MAPPER );
+				
+		for(Employee emp:list) {
+			System.out.println(""+emp.toString());
+		}
+		return list;
 	}
 }
