@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +29,7 @@ public class AdministratorController {
 
 	@Autowired
 	private AdministratorService administratorService;
-	
+
 	@Autowired
 	private HttpSession session;
 
@@ -41,8 +42,8 @@ public class AdministratorController {
 	public InsertAdministratorForm setUpInsertAdministratorForm() {
 		return new InsertAdministratorForm();
 	}
-	
-	//  (SpringSecurityに任せるためコメントアウトしました)
+
+	// (SpringSecurityに任せるためコメントアウトしました)
 	@ModelAttribute
 	public LoginForm setUpLoginForm() {
 		return new LoginForm();
@@ -58,40 +59,43 @@ public class AdministratorController {
 	 */
 	@RequestMapping("/toInsert")
 	public String toInsert() {
-		
+
 		return "administrator/insert";
 	}
 
 	/**
 	 * 管理者情報を登録します.
 	 * 
-	 * @param form
-	 *            管理者情報用フォーム
+	 * @param form 管理者情報用フォーム
 	 * @return ログイン画面へリダイレクト
 	 */
 	@RequestMapping("/insert")
-	public String insert(@Validated InsertAdministratorForm form,BindingResult result,Model model) {
-		Administrator administrator = new Administrator();
-		// フォームからドメインにプロパティ値をコピー	
-		BeanUtils.copyProperties(form, administrator);
+	public String insert(@Validated InsertAdministratorForm form, BindingResult result, Model model) {
 		String checkpassword = form.getCheckpassword();
-		
-		if(result.hasErrors()) {
+
+		if (administratorService.isExist(form.getMailAddress())) {// 既存メールチェック
+			FieldError error = new FieldError(result.getObjectName(), "mailAddress", "既存のメールアドレスです");
+			result.addError(error);
+		}
+
+		if (checkpassword.equals(form.getPassword())) {// パスワードチェック
+		} else {
+			FieldError error1 = new FieldError(result.getObjectName(), "checkpassword", "");
+			FieldError error2 = new FieldError(result.getObjectName(), "password", "パスワードが一致しませんでした");
+			result.addError(error1);
+			result.addError(error2);
+		}
+
+		if (result.hasErrors()) {
 			return toInsert();
 		}
+
+		Administrator administrator = new Administrator();
+		// フォームからドメインにプロパティ値をコピー
+		BeanUtils.copyProperties(form, administrator);
 		
-		if(administratorService.isExist(administrator.getMailAddress())) {//既存メールチェック
-			model.addAttribute("mailIsExist", "既存のメールアドレスです");
-			return toInsert(); 
-		}
-		
-		if(checkpassword.equals(administrator.getPassword())) {//パスワードチェック
-			administratorService.insert(administrator);			
-		}else {
-			model.addAttribute("notEqualPassword", "パスワードが一致しませんでした");
-		}
-		
-		
+		administratorService.insert(administrator);
+
 		return "redirect:/";
 	}
 
@@ -111,10 +115,8 @@ public class AdministratorController {
 	/**
 	 * ログインします.
 	 * 
-	 * @param form
-	 *            管理者情報用フォーム
-	 * @param result
-	 *            エラー情報格納用オブッジェクト
+	 * @param form   管理者情報用フォーム
+	 * @param result エラー情報格納用オブッジェクト
 	 * @return ログイン後の従業員一覧画面
 	 */
 	@RequestMapping("/login")
@@ -127,7 +129,7 @@ public class AdministratorController {
 		session.setAttribute("administratorName", administrator.getName());
 		return "forward:/employee/showList";
 	}
-	
+
 	/////////////////////////////////////////////////////
 	// ユースケース：ログアウトをする
 	/////////////////////////////////////////////////////
@@ -141,5 +143,5 @@ public class AdministratorController {
 		session.invalidate();
 		return "redirect:/";
 	}
-	
+
 }

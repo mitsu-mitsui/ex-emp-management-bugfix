@@ -24,7 +24,7 @@ public class InsertAdministratorForm {
 	private String password;
 
 	/** 確認パスワード */
-	@NotBlank(message = "確認パスワードを入力してください")
+	@NotBlank(message = "")
 	private String checkpassword;
 
 	public String getCheckpassword() {
