@@ -52,12 +52,52 @@ public class EmployeeRepository {
 	 */
 	public List<Employee> findAll() {
 		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
-				+ " ORDER BY hire_date ASC";
+				+ " ORDER BY hire_date ASC;";
 
 		List<Employee> developmentList = template.query(sql, EMPLOYEE_ROW_MAPPER);
 
 		return developmentList;
 	}
+	
+	/**
+	 * ページ番号に対する従業員情報を取得する．
+	 * 
+	 * @param pageNum ページ番号
+	 * @return ページ番号に対する10件以下の従業員情報
+	 */
+	public List<Employee> findAllByPageNum(int pageNum){
+		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
+				+ " ORDER BY hire_date ASC "
+				+ " OFFSET :firstOrder Limit 10;";
+		
+		SqlParameterSource param = new MapSqlParameterSource("firstOrder",pageNum*10);
+		
+		return template.query(sql, param, EMPLOYEE_ROW_MAPPER);
+	}
+	
+	/**
+	 * ページ番号に対する10件以下の従業員名あいまい検索を行う．
+	 * 
+	 * @param name 検索する名前
+	 * @param pageNum ページ番号
+	 * @return 10件以下の従業員情報
+	 */
+	public List<Employee> findLikeNameByPageNum(String name,int pageNum) {
+		List<Employee> list = new ArrayList<>();
+
+		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
+				+ " WHERE name LIKE :name"
+				+ " ORDER BY hire_date ASC"
+				+ " OFFSET :firstOrder Limit 10;";
+		SqlParameterSource param = new MapSqlParameterSource("name","%"+name+"%").addValue("firstOrder", pageNum*10);
+		
+		list = template.query(sql, param,EMPLOYEE_ROW_MAPPER );
+		
+		
+		return list;
+	}
+	
+	
 
 	/**
 	 * 主キーから従業員情報を取得します.
@@ -97,14 +137,12 @@ public class EmployeeRepository {
 
 		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
 				+ " WHERE name LIKE :name"
-				+ " ORDER BY hire_date ASC";
-		SqlParameterSource param = new MapSqlParameterSource("name","%"+name+"%");
+				+ " ORDER BY hire_date ASC;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name","%"+name+"%");
 		
 		list = template.query(sql, param,EMPLOYEE_ROW_MAPPER );
 				
-		for(Employee emp:list) {
-			System.out.println(""+emp.toString());
-		}
 		return list;
 	}
+	
 }

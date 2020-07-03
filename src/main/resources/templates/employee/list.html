@@ -67,14 +67,16 @@
 				<!-- ここから上を編集する必要はありません -->
 
 				<!-- ここにモックのtable要素を貼り付けます -->
-				
+
 				<!-- お名前検索フォーム -->
 				<form th:action="@{/employee/showList}" method="post">
-					<input name="name" type="text" placeholder="検索する従業員名を入力してください" size = "50">
+					<input name="name" type="text" placeholder="検索する従業員名を入力してください"
+						size="50">
 					<button>検索</button>
 				</form>
 				<br>
 				<div th:text="${employeeListisEmpty}">not exists</div>
+
 				<table class="table table-striped">
 					<thead>
 						<tr>
@@ -84,7 +86,10 @@
 						</tr>
 					</thead>
 					<tbody>
+						<!--  
 						<tr th:each="employee : ${employeeList}">
+							 -->
+						<tr th:each="employee : ${employeePagingList}">
 							<td><a href="detail.html"
 								th:href="@{'/employee/showDetail?id=' + ${employee.id}}"> <span
 									th:text="${employee.name}">山田太郎</span>
@@ -103,7 +108,19 @@
 
 			</div>
 		</div>
+		<!-- ページ番号 -->
+		<div style="text-align: center;">
+			<a th:unless="${nowPageNum} == ${firstPageNum}"
+				th:href="@{/employee/showList?nowPageNum=}+${nowPageNum-1}+'&name='+${session.name}"><span
+				th:text="'<<'+${__${nowPageNum}-1__}"></span></a> <span
+				th:text="'               '+${nowPageNum}+'              ' "></span>
+			<a th:unless="${nowPageNum} == ${session.maxpagesize}"
+				th:href="@{/employee/showList?nowPageNum=}+${__${nowPageNum}+1__}+'&name='+${session.name}"><span
+				th:text="${__${nowPageNum}+1__}+'>>'"></span></a>
+		</div>
+		<!-- ページ番号終わり -->
 	</div>
+
 	<!-- end container -->
 
 	<script

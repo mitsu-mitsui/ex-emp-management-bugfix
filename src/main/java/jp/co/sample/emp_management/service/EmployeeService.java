@@ -21,17 +21,68 @@ public class EmployeeService {
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
-	
+
 	/**
 	 * 従業員情報を全件取得します.
 	 * 
-	 * @return　従業員情報一覧
+	 * @return 従業員情報一覧
 	 */
 	public List<Employee> showList() {
 		List<Employee> employeeList = employeeRepository.findAll();
 		return employeeList;
 	}
-	
+
+	// 10件分のページをとってくる(全件)
+	public List<Employee> showPagingList(int pageNum) {
+		return employeeRepository.findAllByPageNum(pageNum);
+	}
+
+	// 10件分のページをとってくる（名前）
+	public List<Employee> showPagingListByName(String name, int pageNum) {
+		
+		List<Employee> list = employeeRepository.findLikeNameByPageNum(name, pageNum);
+
+		return list;
+	}
+
+	public int getShowListSize() {
+		List<Employee> list = showList();
+		return list.size();
+	}
+
+	public int getShowListSizeByname(String name) {
+		int size = showListByName(name).size();
+		return size;
+	}
+
+	public int getMaxPageNum() {
+		List<Employee> list = employeeRepository.findAll();
+		int size = list.size();
+
+		if (size % 10 == 0) {
+			return size / 10 - 1;
+		} else {
+			return size / 10;
+		}
+	}
+
+	public int getMaxPageNum(String name) {
+		List<Employee> list = employeeRepository.findLikeName(name);
+
+		if (list.isEmpty()) {// 要素なし
+			return 0;
+		}
+
+		int size = list.size();
+
+		if (size % 10 == 0) {
+			return size / 10 - 1;
+		} else {
+			return size / 10;
+		}
+
+	}
+
 	/**
 	 * 従業員情報を取得します.
 	 * 
@@ -43,23 +94,25 @@ public class EmployeeService {
 		Employee employee = employeeRepository.load(id);
 		return employee;
 	}
-	
+
 	/**
 	 * 従業員情報を更新します.
 	 * 
-	 * @param employee　更新した従業員情報
+	 * @param employee 更新した従業員情報
 	 */
 	public void update(Employee employee) {
 		employeeRepository.update(employee);
 	}
-	
+
 	/**
 	 * あいまい検索で従業員情報を取得します．
 	 * 
 	 * @param name 検索する従業員名
 	 * @return 従業員情報一覧
 	 */
-	public List<Employee> showListByName(String name){
+	public List<Employee> showListByName(String name) {
+
 		return employeeRepository.findLikeName(name);
 	}
+
 }
