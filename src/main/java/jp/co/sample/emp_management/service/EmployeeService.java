@@ -1,5 +1,6 @@
 package jp.co.sample.emp_management.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,64 +24,46 @@ public class EmployeeService {
 	private EmployeeRepository employeeRepository;
 
 	/**
-	 * 従業員情報を全件取得します.
+	 * 1ページ分の従業員情報を取得する．
 	 * 
-	 * @return 従業員情報一覧
+	 * @param name    検索名
+	 * @param pageNum 表示するページの番号
+	 * @return ページ番号に対して表示する従業員情報
 	 */
-	public List<Employee> showList() {
-		List<Employee> employeeList = employeeRepository.findAll();
-		return employeeList;
-	}
-
-	// 10件分のページをとってくる(全件)
-	public List<Employee> showPagingList(int pageNum) {
-		return employeeRepository.findAllByPageNum(pageNum);
-	}
-
-	// 10件分のページをとってくる（名前）
 	public List<Employee> showPagingListByName(String name, int pageNum) {
-		
+
 		List<Employee> list = employeeRepository.findLikeNameByPageNum(name, pageNum);
 
 		return list;
 	}
 
-	public int getShowListSize() {
-		List<Employee> list = showList();
-		return list.size();
+	/**
+	 * 検索hit数を取得．
+	 * 
+	 * @param name 検索名
+	 * @return 検索hit数
+	 */
+	public int getSerchHitNum(String name) {
+		return employeeRepository.findLikeName(name);
 	}
 
-	public int getShowListSizeByname(String name) {
-		int size = showListByName(name).size();
-		return size;
-	}
+	/**
+	 * ページ数のリストを取得する．
+	 * 
+	 * @param name 検索名
+	 * @return ページ数が格納されたリスト
+	 */
+	public List<Integer> getPageNumList(String name) {
+		int size = employeeRepository.findLikeName(name);
 
-	public int getMaxPageNum() {
-		List<Employee> list = employeeRepository.findAll();
-		int size = list.size();
+		int maxPage = (size / 10) + 1;
 
-		if (size % 10 == 0) {
-			return size / 10 - 1;
-		} else {
-			return size / 10;
-		}
-	}
-
-	public int getMaxPageNum(String name) {
-		List<Employee> list = employeeRepository.findLikeName(name);
-
-		if (list.isEmpty()) {// 要素なし
-			return 0;
+		List<Integer> pageNumList = new ArrayList<>();
+		for (int i = 1; i <= maxPage; i++) {
+			pageNumList.add(i);
 		}
 
-		int size = list.size();
-
-		if (size % 10 == 0) {
-			return size / 10 - 1;
-		} else {
-			return size / 10;
-		}
-
+		return pageNumList;
 	}
 
 	/**
@@ -102,17 +85,6 @@ public class EmployeeService {
 	 */
 	public void update(Employee employee) {
 		employeeRepository.update(employee);
-	}
-
-	/**
-	 * あいまい検索で従業員情報を取得します．
-	 * 
-	 * @param name 検索する従業員名
-	 * @return 従業員情報一覧
-	 */
-	public List<Employee> showListByName(String name) {
-
-		return employeeRepository.findLikeName(name);
 	}
 
 }

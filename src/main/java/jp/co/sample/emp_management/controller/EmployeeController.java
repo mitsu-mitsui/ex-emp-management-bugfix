@@ -1,9 +1,6 @@
 package jp.co.sample.emp_management.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,11 +27,6 @@ public class EmployeeController {
 	@Autowired
 	private EmployeeService employeeService;
 
-	@Autowired
-	private HttpSession session;
-
-	private String name;
-
 	/**
 	 * 使用するフォームオブジェクトをリクエストスコープに格納する.
 	 * 
@@ -49,31 +41,6 @@ public class EmployeeController {
 	// ユースケース：従業員一覧を表示する
 	/////////////////////////////////////////////////////
 	/**
-	 * 従業員一覧画面を出力します.
-	 * 
-	 * @param model モデル
-	 * @return 従業員一覧画面
-	 */
-	// @RequestMapping("/showList")
-	public String showList(Model model, String name) {
-		List<Employee> employeeList;
-		if (name == null) {// 初期・空
-			employeeList = employeeService.showList();
-		} else {// 検索時
-			employeeList = employeeService.showListByName(name);
-			if (employeeList.isEmpty()) {// リスト空
-				employeeList = employeeService.showList();
-				model.addAttribute("employeeListisEmpty", "1件もありませんでした");
-			}
-		}
-		model.addAttribute("employeeList", employeeList);
-
-		return "employee/list";
-	}
-
-	// pagingを実装する場所
-	// @RequestMapping("/showPagingList")
-	/**
 	 * 従業員一覧画面の表示．
 	 * 
 	 * @param model      ページ数情報を格納するリクエストスコープ
@@ -82,47 +49,25 @@ public class EmployeeController {
 	 * @return 初回・検索結果hitなし：従業員情報一覧表示/検索時：検索結果一覧表示
 	 */
 	@RequestMapping("/showList")
-	public String showPagingList(Model model, String nowPageNum, String name) {
-		List<Employee> employeePagingList;
-
-		if (nowPageNum == null && name == null) {// 初回
-			employeePagingList = employeeService.showPagingList(0);
-			this.name = name;
-			session.setAttribute("name", name);
-			session.setAttribute("maxpagesize", employeeService.getMaxPageNum());
-		} else {
-			if (name == null || "null".equals(name)) {// 検索なし
-				employeePagingList = employeeService.showPagingList(Integer.parseInt(nowPageNum));
-				session.setAttribute("name", name);
-			} else {
-				if (!name.equals(this.name)) {
-					session.setAttribute("name", name);
-					session.setAttribute("maxpagesize", employeeService.getMaxPageNum(name));
-				}
-				this.name = name;
-
-				if (employeeService.showListByName(name).isEmpty()) {// 1件もない
-					employeePagingList = new ArrayList<Employee>();
-					model.addAttribute("employeeListisEmpty", "該当の従業員はいませんでした");
-				} else {
-					try {
-						employeePagingList = employeeService.showPagingListByName(name, Integer.parseInt(nowPageNum));
-					}catch (Exception e) {
-						employeePagingList = employeeService.showPagingListByName(name,0);
-					}
-				}
-				session.setAttribute("name", name);
-			}
+	public String showPagingList(Model model, String name, Integer nowPageNum) {
+		if (name == null) {// 最初
+			name = "";
+		}
+		if (nowPageNum == null) {// 最初
+			nowPageNum = 0;
+		}
+		if (employeeService.getSerchHitNum(name) == 0) {// nohit
+			model.addAttribute("employeeListisEmpty", "1件も該当しませんでした。");
 		}
 
+		List<Employee> employeePagingList = employeeService.showPagingListByName(name, nowPageNum);
 		model.addAttribute("employeePagingList", employeePagingList);
-		model.addAttribute("firstPageNum", 0);
 
-		if (nowPageNum == null) {// 初期
-			model.addAttribute("nowPageNum", 0);
-		} else {
-			model.addAttribute("nowPageNum", nowPageNum);
-		}
+		model.addAttribute("name", name);
+		model.addAttribute("nowPageNum", nowPageNum);
+		model.addAttribute("pageNumList", employeeService.getPageNumList(name));
+
+		System.out.println(employeeService.getPageNumList(name));
 
 		return "employee/list";
 	}

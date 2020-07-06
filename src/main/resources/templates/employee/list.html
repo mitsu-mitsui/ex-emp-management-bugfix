@@ -75,7 +75,7 @@
 					<button>検索</button>
 				</form>
 				<br>
-				<div th:text="${employeeListisEmpty}">not exists</div>
+				<div th:text="${employeeListisEmpty}" style="color:red;">not exists</div>
 
 				<table class="table table-striped">
 					<thead>
@@ -86,9 +86,6 @@
 						</tr>
 					</thead>
 					<tbody>
-						<!--  
-						<tr th:each="employee : ${employeeList}">
-							 -->
 						<tr th:each="employee : ${employeePagingList}">
 							<td><a href="detail.html"
 								th:href="@{'/employee/showDetail?id=' + ${employee.id}}"> <span
@@ -108,19 +105,17 @@
 
 			</div>
 		</div>
+
 		<!-- ページ番号 -->
 		<div style="text-align: center;">
-			<a th:unless="${nowPageNum} == ${firstPageNum}"
-				th:href="@{/employee/showList?nowPageNum=}+${nowPageNum-1}+'&name='+${session.name}"><span
-				th:text="'<<'+${__${nowPageNum}-1__}"></span></a> <span
-				th:text="'               '+${nowPageNum}+'              ' "></span>
-			<a th:unless="${nowPageNum} == ${session.maxpagesize}"
-				th:href="@{/employee/showList?nowPageNum=}+${__${nowPageNum}+1__}+'&name='+${session.name}"><span
-				th:text="${__${nowPageNum}+1__}+'>>'"></span></a>
+			<span th:each="pageNum : ${pageNumList}"> <a
+				th:href="@{/employee/showList?nowPageNum=}+${pageNum-1}+'&name='+${name}">
+					<span th:text="'     ' + ${pageNum}+'     ' "></span>
+			</a>
+			</span>
 		</div>
-		<!-- ページ番号終わり -->
+		<!-- ページ番号おわり -->
 	</div>
-
 	<!-- end container -->
 
 	<script

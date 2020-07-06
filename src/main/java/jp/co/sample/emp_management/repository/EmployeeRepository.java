@@ -46,58 +46,24 @@ public class EmployeeRepository {
 	private NamedParameterJdbcTemplate template;
 
 	/**
-	 * 従業員一覧情報を入社日順で取得します.
-	 * 
-	 * @return 全従業員一覧 従業員が存在しない場合はサイズ0件の従業員一覧を返します
-	 */
-	public List<Employee> findAll() {
-		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
-				+ " ORDER BY hire_date ASC;";
-
-		List<Employee> developmentList = template.query(sql, EMPLOYEE_ROW_MAPPER);
-
-		return developmentList;
-	}
-	
-	/**
-	 * ページ番号に対する従業員情報を取得する．
-	 * 
-	 * @param pageNum ページ番号
-	 * @return ページ番号に対する10件以下の従業員情報
-	 */
-	public List<Employee> findAllByPageNum(int pageNum){
-		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
-				+ " ORDER BY hire_date ASC "
-				+ " OFFSET :firstOrder Limit 10;";
-		
-		SqlParameterSource param = new MapSqlParameterSource("firstOrder",pageNum*10);
-		
-		return template.query(sql, param, EMPLOYEE_ROW_MAPPER);
-	}
-	
-	/**
 	 * ページ番号に対する10件以下の従業員名あいまい検索を行う．
 	 * 
-	 * @param name 検索する名前
+	 * @param name    検索する名前
 	 * @param pageNum ページ番号
 	 * @return 10件以下の従業員情報
 	 */
-	public List<Employee> findLikeNameByPageNum(String name,int pageNum) {
+	public List<Employee> findLikeNameByPageNum(String name, int pageNum) {
 		List<Employee> list = new ArrayList<>();
 
 		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
-				+ " WHERE name LIKE :name"
-				+ " ORDER BY hire_date ASC"
-				+ " OFFSET :firstOrder Limit 10;";
-		SqlParameterSource param = new MapSqlParameterSource("name","%"+name+"%").addValue("firstOrder", pageNum*10);
-		
-		list = template.query(sql, param,EMPLOYEE_ROW_MAPPER );
-		
-		
+				+ " WHERE name LIKE :name" + " ORDER BY hire_date ASC" + " OFFSET :firstOrder Limit 10;";
+		SqlParameterSource param = new MapSqlParameterSource("name", "%" + name + "%").addValue("firstOrder",
+				pageNum * 10);
+
+		list = template.query(sql, param, EMPLOYEE_ROW_MAPPER);
+
 		return list;
 	}
-	
-	
 
 	/**
 	 * 主キーから従業員情報を取得します.
@@ -127,22 +93,19 @@ public class EmployeeRepository {
 	}
 
 	/**
-	 * 従業員名のあいまい検索をする．
+	 * 検索名に対して何件hitするかを取得する．
 	 * 
-	 * @param name 検索する従業員名
-	 * @return 一致する従業員情報一覧
+	 * @param name 検索名
+	 * @return hit数
 	 */
-	public List<Employee> findLikeName(String name) {
-		List<Employee> list = new ArrayList<>();
+	public int findLikeName(String name) {
 
-		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count FROM employees"
-				+ " WHERE name LIKE :name"
-				+ " ORDER BY hire_date ASC;";
-		SqlParameterSource param = new MapSqlParameterSource().addValue("name","%"+name+"%");
-		
-		list = template.query(sql, param,EMPLOYEE_ROW_MAPPER );
-				
-		return list;
+		String sql = "SELECT count(*) FROM employees" + " WHERE name LIKE :name;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", "%" + name + "%");
+
+		Integer count = template.queryForObject(sql, param, Integer.class);
+
+		return count;
 	}
-	
+
 }
